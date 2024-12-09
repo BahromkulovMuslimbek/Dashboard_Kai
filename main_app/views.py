@@ -1,3 +1,215 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q
+from . import models
 
-# Create your views here.
+
+def main(request):
+    query = request.GET.get('q', '')
+    shift_id = request.GET.get('shift', '')
+    attendance_status = request.GET.get('status', '')
+    staff_list = models.Staff.objects.all()
+
+    if query:
+        staff_list = staff_list.filter(
+            Q(first_name__icontains=query) | Q(last_name__icontains=query)
+        )
+
+    if shift_id:
+        staff_ids_with_shift = models.StaffShift.objects.filter(
+            shift_id=shift_id).values_list('staff_id', flat=True)
+        staff_list = staff_list.filter(id__in=staff_ids_with_shift)
+
+    if attendance_status:
+        staff_ids_with_attendance = models.StaffAttendance.objects.filter(
+            status=attendance_status).values_list('staff_id', flat=True)
+        staff_list = staff_list.filter(id__in=staff_ids_with_attendance)
+
+    staff_attendance = models.StaffAttendance.objects.filter(
+        staff__in=staff_list)
+    attendance_list = []
+    for staff in staff_list:
+        status = staff_attendance.filter(
+            staff=staff).values_list(
+            'status', flat=True).first()
+        attendance_list.append({
+            'staff': staff,
+            'status': status or 'No Attendance Record'
+        })
+
+    context = {
+        'staff_list': attendance_list,
+        'shifts': models.Shift.objects.all(),
+        'statuses': ['Present', 'Absent'],
+    }
+    return render(request, 'index.html', context)
+
+
+def staff_create(request):
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        phone = request.POST.get('phone')
+        age = request.POST.get('age')
+        address = request.POST.get('address')
+        models.Staff.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            phone=phone,
+            age=age,
+            address=address)
+        return redirect('staff_list')
+    return render(request, 'crud/staff/staff_form.html')
+
+
+def staff_edit(request, pk):
+    staff = get_object_or_404(models.Staff, pk=pk)
+    if request.method == 'POST':
+        staff.first_name = request.POST.get('first_name')
+        staff.last_name = request.POST.get('last_name')
+        staff.phone = request.POST.get('phone')
+        staff.age = request.POST.get('age')
+        staff.address = request.POST.get('address')
+        staff.save()
+        return redirect('staff_list')
+    return render(request, 'crud/staff/staff_form.html', {'staff': staff})
+
+
+def staff_delete(request, pk):
+    staff = get_object_or_404(models.Staff, pk=pk)
+    if request.method == 'POST':
+        staff.delete()
+        return redirect('staff_list')
+    return render(request,
+                  'crud/staff/staff_confirm_delete.html',
+                  {'staff': staff})
+
+
+def shift_list(request):
+    shift_list = models.Shift.objects.all()
+    return render(request,
+                  'crud/shift/shift_list.html',
+                  {'shift_list': shift_list})
+
+
+def shift_create(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time')
+        models.Shift.objects.create(
+            name=name,
+            start_time=start_time,
+            end_time=end_time)
+        return redirect('shift_list')
+    return render(request, 'crud/shift/shift_form.html')
+
+
+def shift_edit(request, pk):
+    shift = get_object_or_404(models.Shift, pk=pk)
+    if request.method == 'POST':
+        shift.name = request.POST.get('name')
+        shift.start_time = request.POST.get('start_time')
+        shift.end_time = request.POST.get('end_time')
+        shift.save()
+        return redirect('shift_list')
+    return render(request, 'crud/shift/shift_form.html', {'shift': shift})
+
+
+def shift_delete(request, pk):
+    shift = get_object_or_404(models.Shift, pk=pk)
+    if request.method == 'POST':
+        shift.delete()
+        return redirect('shift_list')
+    return render(request,
+                  'crud/shift/shift_confirm_delete.html',
+                  {'shift': shift})
+
+
+def staffshift_list(request):
+    staffshift_list = models.StaffShift.objects.all()
+    return render(request, 'crud/staffshift/staffshift_list.html',
+                  {'staffshift_list': staffshift_list})
+
+
+def staffshift_create(request):
+    if request.method == 'POST':
+        staff_id = request.POST.get('staff')
+        shift_id = request.POST.get('shift')
+        staff = get_object_or_404(models.Staff, id=staff_id)
+        shift = get_object_or_404(models.Shift, id=shift_id)
+        models.StaffShift.objects.create(staff=staff, shift=shift)
+        return redirect('staffshift_list')
+    staff_list = models.Staff.objects.all()
+    shift_list = models.Shift.objects.all()
+    return render(request, 'crud/staffshift/staffshift_form.html',
+                  {'staff_list': staff_list, 'shift_list': shift_list})
+
+
+def staffshift_edit(request, pk):
+    staffshift = get_object_or_404(models.StaffShift, pk=pk)
+    if request.method == 'POST':
+        staff_id = request.POST.get('staff')
+        shift_id = request.POST.get('shift')
+        staffshift.staff = get_object_or_404(models.Staff, id=staff_id)
+        staffshift.shift = get_object_or_404(models.Shift, id=shift_id)
+        staffshift.save()
+        return redirect('staffshift_list')
+    staff_list = models.Staff.objects.all()
+    shift_list = models.Shift.objects.all()
+    return render(request,
+                  'crud/staffshift/staffshift_form.html',
+                  {'staffshift': staffshift,
+                   'staff_list': staff_list,
+                   'shift_list': shift_list})
+
+
+def staffshift_delete(request, pk):
+    staffshift = get_object_or_404(models.StaffShift, pk=pk)
+    if request.method == 'POST':
+        staffshift.delete()
+        return redirect('staffshift_list')
+    return render(request,
+                  'crud/staffshift/staffshift_confirm_delete.html',
+                  {'staffshift': staffshift})
+
+
+def position_list(request):
+    positions = models.Position.objects.all()
+    return render(request,
+                  'crud/position/position_list.html',
+                  {'positions': positions})
+
+
+def position_create(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        models.Position.objects.create(name=name)
+        return redirect('position_list')
+    return render(request, 'crud/position/position_form.html')
+
+
+def position_edit(request, pk):
+    position = get_object_or_404(models.Position, pk=pk)
+    if request.method == 'POST':
+        position.name = request.POST.get('name')
+        position.save()
+        return redirect('position_list')
+    return render(request,
+                  'crud/position/position_form.html',
+                  {'position': position})
+
+
+def position_delete(request, pk):
+    position = get_object_or_404(models.Position, pk=pk)
+    if request.method == 'POST':
+        position.delete()
+        return redirect('position_list')
+    return render(request,
+                  'crud/position/position_confirm_delete.html',
+                  {'position': position})
+
+
+def attendance_list(request):
+    attendance_list = models.StaffAttendance.objects.all()
+    return render(request, 'crud/attendance_list.html',
+                  {'attendance_list': attendance_list})
