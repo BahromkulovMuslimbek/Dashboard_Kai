@@ -3,3 +3,19 @@
 
 Вот docs файл, что бы узнать по больше о проекте https://docs.google.com/document/d/1tKWPk20WnZiQkeZHtTq44If1YLroLQMHV4KXDPiH3sE/edit?pli=1&tab=t.0
 !!! Файл на узбекском, но вы можете его перевести !!!
+
+## Использование
+Команда для запуска проекта:
+'''python manage.py runserver'''
+
+Команда для добавления superuser:
+'''python manage.py createsuperuser'''
+
+## Источники
+я взял готовый template на сайте - https://themewagon.com/
+
+линк на этот template - https://themewagon.com/themes/kaiadmin/
+
+## FAQ
+мой телеграм - https://t.me/muslimbekd
+если у вас какие та вопросы то можете смело обращастя мне в личку, буду рад ответить и помоч вам
