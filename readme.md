@@ -16,6 +16,6 @@
 
 линк на этот template - https://themewagon.com/themes/kaiadmin/
 
-## how to contact me
+## Как связаться со мной
 мой телеграм - https://t.me/muslimbekd
 если у вас какие-то вопросы то можете смело обращайтесь мне в личку, буду рад ответить и помочь вам

@@ -2,35 +2,33 @@ from . import models
 
 
 def create_datas():
-    staff_1 = models.Staff.objects.create(
-        first_name='Ali',
-        last_name='Azamatov',
-        phone='998907772233',
-        age=30,
-        address='Tokyo')
-    staff_2 = models.Staff.objects.create(
-        first_name='Alex',
-        last_name='Davlatov',
-        phone='998903337711',
-        age=25,
-        address='Sidney')
-    staff_3 = models.Staff.objects.create(
-        first_name='Maria',
-        last_name='Rahimov',
-        phone='998906661122',
-        age=28,
-        address='Moscow')
-    staff_4 = models.Staff.objects.create(
-        first_name='John',
-        last_name='Dadajonov',
-        phone='998337772233',
-        age=19,
-        address='Paris')
-    staff_5 = models.Staff.objects.create(
-        first_name='Lucy',
-        last_name='Ibragimov',
-        phone='998911112233',
-        age=32,
-        address='Rome')
+    staff_data = [{'first_name': 'Steve',
+                   'last_name': 'Harrison',
+                   'phone': '8(959)715-55-47',
+                   'age': 30,
+                   'address': 'Tokyo'},
+                  {'first_name': 'Alex',
+                   'last_name': 'Enderson',
+                   'phone': '426(6094)855-93-25',
+                   'age': 25,
+                   'address': 'Sidney'},
+                  {'first_name': 'Maria',
+                   'last_name': 'Johnson',
+                   'phone': '10(606)220-76-74',
+                   'age': 28,
+                   'address': 'Moscow'},
+                  {'first_name': 'John',
+                   'last_name': 'Black',
+                   'phone': '71(23)637-89-87',
+                   'age': 19,
+                   'address': 'Paris'},
+                  {'first_name': 'Lucy',
+                   'last_name': 'Adamson',
+                   'phone': '42(39)260-85-26',
+                   'age': 41,
+                   'address': 'Rome'},
+                  ]
 
-    print(f"Created: {staff_1}, {staff_2}, {staff_3}, {staff_4, {staff_5}}")
+    staff_objects = [
+        models.Staff.objects.create(
+            **data) for data in staff_data]
